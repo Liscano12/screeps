@@ -1,0 +1,5 @@
+# Ignore the JavaScript build folder
+default/*
+
+# Ignore node_modules folder
+node_modules/
