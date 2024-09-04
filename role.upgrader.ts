@@ -15,9 +15,15 @@ var roleUpgrader = {
 	    if(!creep.memory.working) {
             //
             if(creep.getStorageEnergy(creep)){
-            }else if(creep.store.getFreeCapacity(RESOURCE_ENERGY)> 1){
+            }else if( creep.getStorageEnergyBig(creep.room)){
                 
-                creep.getStorageEnergyBig(creep.room)
+               
+            }else if(creep.room.controller && creep.room.controller.level<3){
+                let source = Game.getObjectById(creep.memory.source)
+                if(!source){
+                    source = creep.getEnergySourceForHarvester(creep.room, creep.memory.role);
+                }
+                creep.harvestSource(source);
             }
         }
         else {

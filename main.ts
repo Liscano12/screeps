@@ -38,7 +38,8 @@ export function loop () {
     let roomNamesToRepair:RoomHomeAndTarget[] = [
         {roomHome: 'W57N34', roomTarget: 'W58N34'},
         {roomHome: 'W58N35', roomTarget: 'W59N35'},
-        {roomHome: 'W58N35', roomTarget: 'W59N34'}
+        {roomHome: 'W58N35', roomTarget: 'W59N34'},
+        {roomHome: 'W58N35', roomTarget: 'W58N36'}
     ]
 
     //Dieser Raum wird erobert, falls möglich
@@ -65,25 +66,6 @@ export function loop () {
 
     //Main loop durch alle sichbaren Räume
     Object.values(Game.rooms).forEach((room)=> {
-
-
-        ///TODO Auto Feinde angreifen exportieren
-        if(room.name ==='W58N36'){
-            let structuresEnemys = room.find(FIND_HOSTILE_STRUCTURES)
-            let creepsEnemys = room.find(FIND_HOSTILE_CREEPS)
-
-            if(structuresEnemys.length!=0 || creepsEnemys.length!=0){
-                let flags= room.find(FIND_FLAGS).filter((f)=>f.name=='Attack')
-                if(flags.length==0){
-                    room.createFlag(25,25,'Attack', COLOR_RED)
-                }
-            }else{
-                let flags= room.find(FIND_FLAGS).filter((f)=>f.name=='Attack')
-                if(flags.length!=0){
-                    flags.forEach((f)=>f.remove())
-                }
-            }
-        }
 
         helper.defend(room)
 

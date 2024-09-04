@@ -31,8 +31,8 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         return s.structureType== STRUCTURE_EXTENSION
     })
     let extensionsWithFreeCapacity: StructureExtension[] = myStructures.filter((s)=>{
-        return s.structureType== STRUCTURE_EXTENSION}).filter((e)=> e.store.getFreeCapacity(RESOURCE_ENERGY) > 1) 
-    
+        return s.structureType== STRUCTURE_EXTENSION}).filter((e)=> e.store.getFreeCapacity(RESOURCE_ENERGY) > 1)
+
     let result;
     if(spawnHarvester(creeps, room)){
         console.log('Spwawn harvester in ',spawns[0].room.name)
@@ -44,8 +44,7 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room,500), 'Builder' + Game.time, 
             {memory: {role: 'builder', working: false, roomHome: room.name}});
         return; 
-    }else if(spawnBigHarvester(creeps,room)){
-        if(spawns[0].room.energyAvailable<constanten.energyNeedenForHarvester){return}
+    }else if(spawnBigHarvester(creeps,room) && !(spawns[0].room.energyAvailable<constanten.energyNeedenForHarvester)){
         console.log('Spwawn Harvester in ',spawns[0].room.name)
         spawns[0].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE] , 'Harvester' + Game.time, 
             {memory: {role: 'harvester', working: false, roomHome: room.name , source: helper.getEnergySourceForHarvester(room,'harvester')}});
