@@ -15,6 +15,7 @@ import roleUpgraderRoomWihoutSpawn  from './role.upgraderRoomWihoutSpawn'
 import roleLogistiker  from './role.logistiker'
 import roleTransporter  from './role.transporter'
 import roleRoomReserver from './role.roomReserver'
+import roleHealer from './role.healer'
 import * as helper  from './helper';
 
 
@@ -124,7 +125,8 @@ export function loop () {
                 roleTransporter.run(creep)
             }if(creep.memory.role == 'roomReserver'){
                 roleRoomReserver.run(creep)
-
+            }if(creep.memory.role == 'roleHealer'){
+                roleHealer.run(creep)
             }
         })
     })

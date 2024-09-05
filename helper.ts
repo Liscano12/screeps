@@ -40,7 +40,7 @@ export function getEnergySourceForHarvester(room:Room, role:string){
 export function defend(room:Room){
     let structuresEnemys = room.find(FIND_HOSTILE_STRUCTURES)
     let creepsEnemys = room.find(FIND_HOSTILE_CREEPS).filter(creep => 
-        creep.body.some(part => part.type === ATTACK || part.type === RANGED_ATTACK)
+        creep.body.some(part => part.type === ATTACK || part.type === RANGED_ATTACK || part.type === CLAIM)
     );
 
     if(structuresEnemys.length!=0 || creepsEnemys.length!=0){

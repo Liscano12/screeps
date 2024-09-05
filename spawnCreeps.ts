@@ -116,15 +116,35 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room, 1500), 'UpgraderRoomWihoutSpawn' + Game.time, {
             memory: {role: 'upgraderRoomWihoutSpawn', roomToUpgrade: result.roomToUpgrade}});
         return
+    }else if(spawnHealer(creeps,room)){
+        console.log('Spwawn Healer in ',spawns[0].room.name)
+        spawns[0].spawnCreep([HEAL,MOVE], 'Healer' + Game.time, {
+            memory: {role: 'healer', roomHome: room.name}});
+        return
     }
+
     return;
     
 }
 
-/*
-Game.getObjectById('66d205ec1eec1f5d2790178a').spawnCreep([WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], 'Harvester' + Game.time, 
-        {memory: {role: 'harvester', working: 'false', roomHome: 'W58N35' , source: undefined}})
+/* harvester upgrader
+Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], 'Upgrader' + Game.time, 
+        {memory: {role: 'upgrader', working: 'false', roomHome: 'W58N36' , source: undefined}})
 */
+
+
+function spawnHealer(creeps:Creep[],room:Room){
+    
+    var healers = creeps.filter((creep) => {
+        return creep.memory.role == 'healer' && creep.memory.roomHome == room.name})
+    if(healers.length >= 1) {return false}
+
+    let injuredCreeps = room.find(FIND_MY_CREEPS).filter((c) => {
+        return c.room.name === room.name && c.hits < c.hitsMax;
+    });
+    if(injuredCreeps.length==0){return false}
+    return true
+}
 
 function spawnUpgraderRoomWihoutSpawn(){
     let result ={spawn: false, roomToUpgrade: ''}
