@@ -2,9 +2,6 @@ import roleHarvester from './role.harvester'
 import roleUpgrader  from './role.upgrader'
 import roleBuilder  from './role.builder'
 import roleRepairer  from './role.repairer'
-import './creepFunctions'
-import tower  from './tower'
-import spawnCreeps  from './spawnCreeps'
 import roleRoomHarvester from './role.roomHarvester'
 import roleRoomClaimer  from './role.roomClaimer'
 import rolestealer  from './role.stealer'
@@ -16,6 +13,10 @@ import roleLogistiker  from './role.logistiker'
 import roleTransporter  from './role.transporter'
 import roleRoomReserver from './role.roomReserver'
 import roleHealer from './role.healer'
+
+import './creepFunctions'
+import tower  from './tower'
+import spawnCreeps  from './spawnCreeps'
 import * as helper  from './helper';
 
 
@@ -24,7 +25,7 @@ export function loop () {
 
     helper.clearCreepMemory()
 
-    //TODOS beschädigte creeps reparieren
+    //TODOS beschädigte creeps reparieren optimieren. Sie laufen davon
 
     //Manual Room Settings
 
@@ -39,8 +40,7 @@ export function loop () {
     let roomNamesToRepair:RoomHomeAndTarget[] = [
         {roomHome: 'W57N34', roomTarget: 'W58N34'},
         {roomHome: 'W58N35', roomTarget: 'W59N35'},
-        {roomHome: 'W58N35', roomTarget: 'W59N34'},
-        {roomHome: 'W58N35', roomTarget: 'W58N36'}
+        {roomHome: 'W58N35', roomTarget: 'W59N34'}
     ]
 
     //Dieser Raum wird erobert, falls möglich
@@ -55,7 +55,9 @@ export function loop () {
     ] ;
     
     // Aus dem Storage eines anderen Spielers wird gestohlen
-    let roomsToStealName:RoomHomeAndTarget[] = [] ;
+    let roomsToStealName:RoomHomeAndTarget[] = [
+        // 'W58N35'
+    ] ;
 
     //Genau diese id wird angegriffen
     let destroyThisObjeckts:RoomHomeAndTarget[] = [
@@ -125,7 +127,7 @@ export function loop () {
                 roleTransporter.run(creep)
             }if(creep.memory.role == 'roomReserver'){
                 roleRoomReserver.run(creep)
-            }if(creep.memory.role == 'roleHealer'){
+            }if(creep.memory.role == 'healer'){
                 roleHealer.run(creep)
             }
         })

@@ -12,7 +12,17 @@ function tower(room:Room){
         return
     }
     towerRepairing(towers);
+    towerHeal(towers, room)
     
+}
+
+function towerHeal(towers:StructureTower[],room:Room){
+    let creepsToHeal = room.find(FIND_MY_CREEPS).filter((c)=>c.hits<c.hitsMax)
+    towers.forEach(tower => {
+        if(tower.store.getFreeCapacity(RESOURCE_ENERGY)<500){
+            tower.heal(creepsToHeal[0])
+        }
+    });
 }
 
 function towerAttackEnemy(towers:StructureTower[]) {

@@ -3,12 +3,6 @@ import * as helper from './helper'
 import constanten from './constanten'
 import _ from "lodash"
 
-
-
-class Harvester extends Creep{
-
-}
-
 function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],roomsToClaimName:RoomHomeAndTarget[],
     destroyThisObjeckts:RoomHomeAndTarget[],roomNamesToRepair:RoomHomeAndTarget[],
     roomsToStealName:RoomHomeAndTarget[],roomsControllerToReserve:RoomHomeAndTarget[],
@@ -34,31 +28,43 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         return s.structureType== STRUCTURE_EXTENSION}).filter((e)=> e.store.getFreeCapacity(RESOURCE_ENERGY) > 1)
 
     let result;
-    if(spawnHarvester(creeps, room)){
-        console.log('Spwawn harvester in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room,constanten.energyNeedenForHarvester) , 'Harvester' + Game.time, 
-            {memory: {role: 'harvester', working: false, roomHome: room.name , source: helper.getEnergySourceForHarvester(room,'harvester')}});
-        return;
-    }else if(spawnBuilder(creeps, room)){
-        console.log('Spwawn Builder in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room,500), 'Builder' + Game.time, 
-            {memory: {role: 'builder', working: false, roomHome: room.name}});
-        return; 
-    }else if(spawnBigHarvester(creeps,room) && !(spawns[0].room.energyAvailable<constanten.energyNeedenForHarvester)){
+
+    //TODO prüfen ob ein creep ein upgrade bekommen kann. Wenn ja, upgraden
+    // Warten um ein upgrade zu erzwingen
+    if(spawnBigHarvester(creeps,room) && !(spawns[0].room.energyAvailable<constanten.energyNeedenForHarvester)){
         console.log('Spwawn Harvester in ',spawns[0].room.name)
         spawns[0].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE] , 'Harvester' + Game.time, 
             {memory: {role: 'harvester', working: false, roomHome: room.name , source: helper.getEnergySourceForHarvester(room,'harvester')}});
         return;
-    }if(spawnUpgrader(creeps,room)){
-        console.log('Spwawn Upgrader in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room, constanten.energyNeedenForUpgrader), 'Upgrader' + Game.time, 
-            {memory: {role: 'upgrader', working: false, roomHome: room.name}});
+    }else if(spawnHarvester(creeps, room)){
+
+        //TODO If upgrade möglich aber nicht genug energie verfügbar = return
+        //upgrade erst das creep bevor andere erschaffen werden
+        // vielleicht in das if mit einem oder upgradePossible()
+        console.log('Spwawn harvester in ',spawns[0].room.name)
+        let bodyAndPrice = getBody([WORK,CARRY,MOVE],room,constanten.energyNeedenForHarvester)
+        spawns[0].spawnCreep( bodyAndPrice.bodyParts, 'Harvester' + Game.time, 
+            {memory: {role: 'harvester', working: false, roomHome: room.name ,source: helper.getEnergySourceForHarvester(room,'harvester'),
+                bodyPrice: bodyAndPrice.price
+            }});
         return;
-    }if(spawnBigUpgrader(creeps,room)){
+    }else if(spawnBuilder(creeps, room)){
+        console.log('Spwawn Builder in ',spawns[0].room.name)
+        let bodyAndPrice = getBody([WORK,CARRY,MOVE],room,500)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'Builder' + Game.time, 
+            {memory: {role: 'builder', working: false, roomHome: room.name, bodyPrice: bodyAndPrice.price}});
+        return; 
+    }else if(spawnUpgrader(creeps,room)){
         console.log('Spwawn Upgrader in ',spawns[0].room.name)
-        if(spawns[0].room.energyAvailable<constanten.energyNeedenForUpgrader){return}
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room, constanten.energyNeedenForUpgrader), 'Upgrader' + Game.time, 
-            {memory: {role: 'upgrader', working: false, roomHome: room.name}});
+        let bodyAndPrice = getBody([WORK,CARRY,MOVE],room, constanten.energyNeedenForUpgrader)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'Upgrader' + Game.time, 
+            {memory: {role: 'upgrader', working: false, roomHome: room.name, bodyPrice: bodyAndPrice.price}});
+        return;
+    }else if(spawnBigUpgrader(creeps,room) && spawns[0].room.energyAvailable>=constanten.energyNeedenForUpgrader){
+        console.log('Spwawn Big Upgrader in ',spawns[0].room.name)
+        let bodyAndPrice = getBody([WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE],room, constanten.energyNeedenForUpgrader)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'Upgrader' + Game.time, 
+            {memory: {role: 'upgrader', working: false, roomHome: room.name, bodyPrice: bodyAndPrice.price}});
         return;
     }else if ((result=spawenCreepsAttacker(room,destroyThisObjeckts)).spawn){
         console.log('Spwawn Attacker in ',spawns[0].room.name)
@@ -67,34 +73,37 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         return
     }else if((result=spawenBuilderNeutralRoom(room,spawenNeutralRoomBuilderHere)).spawn){
         console.log('Spwawn BuilderNeutralRoom in ',spawns[0].room.name)
-       spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room, 1200), 'BuilderNeutralRoom' + Game.time, 
-       {memory: {role: 'builderNeutralRoom', working: false, roomHome: room.name, roomToBuild:result.roomToBuild }});
-       return;
+        let bodyAndPrice = getBody([WORK,CARRY,MOVE],room, 1200)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'BuilderNeutralRoom' + Game.time, 
+        {memory: {role: 'builderNeutralRoom', working: false, roomHome: room.name, roomToBuild:result.roomToBuild, bodyPrice: bodyAndPrice.price}});
+        return;
     }else if((result=spawnRoomHarvester(room,extensions, spawns, extensionsWithFreeCapacity,roomNamesToHarvest)).spawn){
         console.log('Spwawn RoomHarvester in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,WORK,WORK,CARRY,MOVE],room, 1100) , 'RoomHarvester' + Game.time, 
-            {memory: {role: 'roomHarvester', working: false, roomToHarvest:  result.roomToHarvest, roomHome: room.name }});
+        let bodyAndPrice = getBody([WORK,WORK,WORK,CARRY,MOVE],room, 1100)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'RoomHarvester' + Game.time, 
+            {memory: {role: 'roomHarvester', working: false, roomToHarvest:  result.roomToHarvest, roomHome: room.name, bodyPrice: bodyAndPrice.price }});
         return;
     }else if((result=spawenRoomTransporter(room,extensions, spawns, extensionsWithFreeCapacity,roomNamesToHarvest)).spawn){
         console.log('Spwawn RoomTransporter in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([CARRY,CARRY,MOVE],room, 1200) , 'RoomTransporter' + Game.time, 
-            {memory: {role: 'roomTransporter', working: false, roomToTransport:  result.roomToTransport, roomHome: room.name }});
+        let bodyAndPrice = getBody([CARRY,CARRY,MOVE],room, 1200)
+        spawns[0].spawnCreep( bodyAndPrice.bodyParts, 'RoomTransporter' + Game.time, 
+            {memory: {role: 'roomTransporter', working: false, roomToTransport:  result.roomToTransport, roomHome: room.name, bodyPrice: bodyAndPrice.price }});
         return;
     }else if((result=spawnRepairer(room,spawns, extensions, roomNamesToRepair)).spawn){
         console.log('Spwawn Repairer in ',spawns[0].room.name)
         spawns[0].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE],  'Repairer' + Game.time, {
             memory: {role: 'repairer', working: false, roomToRepair: result.roomToRepair, roomHome: room.name}});
         return;
-    }if(spawnLogistiker(creeps,room)){
-        if(spawns[0].room.energyAvailable<1000){return}
+    }if(spawnLogistiker(creeps,room) && spawns[0].room.energyAvailable>=1000){
         console.log('Spwawn Logistiker in ',spawns[0].room.name)
         spawns[0].spawnCreep([CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], 'Logistiker' + Game.time, 
             {memory: {role: 'logistiker', working: false, roomHome: room.name}});
         return;
     }else if((result=spawenCreepsStealer(room,spawns, extensions, extensionsWithFreeCapacity, roomsToStealName)).spawn) {
         console.log('Spwawn Stealer in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room,1500) , 'Stealer' + Game.time, 
-        {memory: {role: 'stealer', working: false, roomToSteal: result.roomToSteal, roomHome: room.name }});
+        let bodyAndPrice = getBody([WORK,CARRY,MOVE],room,1500)
+        spawns[0].spawnCreep( bodyAndPrice.bodyParts, 'Stealer' + Game.time, 
+        {memory: {role: 'stealer', working: false, roomToSteal: result.roomToSteal, roomHome: room.name, bodyPrice: bodyAndPrice.price }});
         return;
     }else if((result=spawenCreepsAttackerFlags(spawns, 'Attack')).spawn){
         console.log('Spwawn Attack in ',spawns[0].room.name)
@@ -113,13 +122,9 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
         return
     }else if((result=spawnUpgraderRoomWihoutSpawn()).spawn){
         console.log('Spwawn UpgraderRoomWihoutSpawn in ',spawns[0].room.name)
-        spawns[0].spawnCreep(getBody([WORK,CARRY,MOVE],room, 1500), 'UpgraderRoomWihoutSpawn' + Game.time, {
-            memory: {role: 'upgraderRoomWihoutSpawn', roomToUpgrade: result.roomToUpgrade}});
-        return
-    }else if(spawnHealer(creeps,room)){
-        console.log('Spwawn Healer in ',spawns[0].room.name)
-        spawns[0].spawnCreep([HEAL,MOVE], 'Healer' + Game.time, {
-            memory: {role: 'healer', roomHome: room.name}});
+        let bodyAndPrice =getBody([WORK,CARRY,MOVE],room, 1500)
+        spawns[0].spawnCreep(bodyAndPrice.bodyParts, 'UpgraderRoomWihoutSpawn' + Game.time, {
+            memory: {role: 'upgraderRoomWihoutSpawn', roomToUpgrade: result.roomToUpgrade, bodyPrice: bodyAndPrice.price}});
         return
     }
 
@@ -128,7 +133,13 @@ function spawenAllCreeps(room:Room,roomNamesToHarvest: RoomHomeAndTarget[],rooms
 }
 
 /* harvester upgrader
-Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], 'Upgrader' + Game.time, 
+Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], 'Harvester' + Game.time, 
+        {memory: {role: 'harvester', working: 'false', roomHome: 'W58N36' , source: undefined}})
+Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], 'Upgrader' + Game.time, 
+        {memory: {role: 'upgrader', working: 'false', roomHome: 'W58N36' , source: undefined}})
+Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,CARRY,MOVE], 'Harvester' + Game.time, 
+        {memory: {role: 'harvester', working: 'false', roomHome: 'W58N36' , source: undefined}})
+Game.getObjectById('66d81e66bd4d1aa1f937474f').spawnCreep([WORK,CARRY,MOVE], 'Upgrader' + Game.time, 
         {memory: {role: 'upgrader', working: 'false', roomHome: 'W58N36' , source: undefined}})
 */
 
@@ -277,6 +288,7 @@ function spawenRoomTransporter(
             }
 
             let targetRomm= Game.rooms[roomName.roomTarget]
+            if(targetRomm == undefined){break}
             let sources = targetRomm.find(FIND_SOURCES)
             if(sources.length==0){break}
 
@@ -319,6 +331,7 @@ function spawnRoomHarvester(
                 continue;
             }
             let targetRomm= Game.rooms[roomName.roomTarget]
+            if(targetRomm == undefined){return result} //TODO eventuell ein bug
             let sources = targetRomm.find(FIND_SOURCES)
             if(sources.length==0){break}
 
@@ -344,7 +357,7 @@ function spawnLogistiker(creeps:Creep[],room:Room){
 
     var logistiker = creeps.filter((creep) => {
         return creep.memory.role == 'logistiker' && creep.memory.roomHome == room.name})
-    if(room.name == 'W58N35' && logistiker.length < 2){return true} //TODO das muss ich anders regeln
+    //if(room.name == 'W58N35' && logistiker.length < 1){return true} //TODO das muss ich anders regeln
     if(logistiker.length < 1) {
        return true
     }
@@ -367,12 +380,21 @@ function spawnUpgrader(creeps:Creep[],room:Room){
 }
 
 function spawnBigUpgrader(creeps:Creep[],room:Room){
+    //TODO Mach den Storage leer!
 
     var upgrader = creeps.filter((creep) => {
         return creep.memory.role == 'upgrader' && creep.memory.roomHome == room.name})
     if(upgrader.length < constanten.smalUpgraderAmount+constanten.bigUpgraderAmmount) {
        return true;    
     }
+    let storages=room.find(FIND_MY_STRUCTURES).filter((s)=> s.structureType==STRUCTURE_STORAGE)
+
+    if(storages.length==0){return false}
+    
+    if(upgrader.length < constanten.smalUpgraderAmount+constanten.bigUpgraderAmmount && storages[0].store.getCapacity(RESOURCE_ENERGY)>50000) {
+        return true;    
+     }
+
     return false;
 }
 
@@ -403,6 +425,8 @@ function spawnHarvester(creeps:Creep[], room:Room){
     if(harvesters.length < constanten.smalHarvesterAmount) {
         return true
     }
+    //room.energyCapacityAvailable
+    //TODO eventuell hier auf upgrade prüfen
     return false
 }
 
@@ -414,7 +438,7 @@ function spawnHarvester(creeps:Creep[], room:Room){
 function spawnBigHarvester(creeps:Creep[],room:Room){
     let harvesters = creeps.filter((creep) => {
         return creep.memory.role == 'harvester' && creep.memory.roomHome==room.name})
-    if(harvesters.length < constanten.smalHarvesterAmount+constanten.bigHarvesterAmount) {
+    if(harvesters.length < constanten.bigHarvesterAmount) {
         return true
     }
     return false
@@ -533,7 +557,7 @@ function spawenCreepsAttackerFlags(spawn:StructureSpawn[], flagName:string){
     return {spawn: true, flag: flagName}
 }
 
-function getBody(segment:BodyPartConstant[], room:Room, maxEnergy:number): BodyPartConstant[]{
+function getBody(segment:BodyPartConstant[], room:Room, maxEnergy:number): BodyAndPrice{
     let body:BodyPartConstant[] = [];
 
     //how much each segment costs
@@ -552,8 +576,10 @@ function getBody(segment:BodyPartConstant[], room:Room, maxEnergy:number): BodyP
     _.times(maxSegemnts, function(){
         _.forEach(segment, s => body.push(s));
     });
+    let bodyAndPrice:BodyAndPrice = {bodyParts:body, price:maxSegemnts*segmentCost}
+    
 
-    return body;
+    return bodyAndPrice;
 }
    
 export default  {spawenAllCreeps, getBody, spawenCreepsStealer,spawenCreepsAttacker,spawenBuilderNeutralRoom,spawenCreepsAttackerFlags};

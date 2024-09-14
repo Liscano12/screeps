@@ -23,6 +23,8 @@ type CreepMemory= HarvesterMemory | BuilderMemory | UpgraderMemory | BuilderNeut
 RoomHarvesterMemory | RoomTransporterMemory | RepairerMemory | LogistikerMemory | StealerMemory |
 AttackFlagMemory | AttackerMemory | RoomClaimerMemory | RoomReserverMemory | UpgraderRoomWihoutSpawn
 
+type BodyAndPrice = {bodyParts:BodyPartConstant[], price:number}
+
 
 interface BaseMemory{
     role:Role

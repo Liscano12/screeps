@@ -2,10 +2,6 @@ var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep:Creep, controller: StructureController) {
-        
-        let myStructures = creep.room.find(FIND_MY_STRUCTURES);
-        let spawns = myStructures.filter((spawn) => {
-            return spawn.structureType== STRUCTURE_SPAWN})
 
         //Regenerate Creep
         creep.regenerateLivetime(300)
@@ -14,10 +10,13 @@ var roleUpgrader = {
         creep.work(false);
 	    if(!creep.memory.working) {
             //
+            let storages = creep.room.find(FIND_MY_STRUCTURES).filter((structure)=> structure.structureType == STRUCTURE_STORAGE )
+            if(storages.length>0){
+                creep.getStorageEnergyBig(creep.room)
+                return
+            }
+
             if(creep.getStorageEnergy(creep)){
-            }else if( creep.getStorageEnergyBig(creep.room)){
-                
-               
             }else if(creep.room.controller && creep.room.controller.level<3){
                 let source = Game.getObjectById(creep.memory.source)
                 if(!source){
